@@ -1,0 +1,8 @@
+{
+  "name": "cursor-mcp-server",
+  "version": "1.0.0",
+  "description": "A specialized MCP server for Cursor IDE that manages .cursor/rules directories",
+  "dependencies": {
+    "@modelcontextprotocol/server-filesystem": "^2025.8.21"
+  }
+}

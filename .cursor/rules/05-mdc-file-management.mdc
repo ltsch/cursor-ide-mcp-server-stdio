@@ -1,0 +1,227 @@
+---
+description: MDC File Management - Rules for creating and managing MDC rule files correctly
+globs: ["**/*.mdc"]
+alwaysApply: true
+priority: critical
+tags: ["mdc", "file-management", "yaml", "frontmatter", "rules"]
+---
+
+# MDC File Management
+
+## 🚨 **CRITICAL: ALWAYS INCLUDE YAML FRONTMATTER**
+
+### **MANDATORY YAML FRONTMATTER STRUCTURE**
+
+**EVERY MDC FILE MUST START WITH:**
+```yaml
+---
+description: "Brief description of what this rule file contains"
+globs: ["**/*.py", "**/*.js", "**/*.ts"]  # File patterns this applies to
+alwaysApply: true  # Whether to always apply this rule
+priority: critical  # critical, high, medium, low
+tags: ["tag1", "tag2", "tag3"]  # Relevant tags for categorization
+---
+```
+
+### **REQUIRED FIELDS**
+- **description**: Brief, clear description of the rule file's purpose
+- **globs**: Array of file patterns where this rule applies
+- **alwaysApply**: Boolean indicating if rule should always be applied
+- **priority**: Priority level (critical, high, medium, low)
+- **tags**: Array of relevant tags for categorization
+
+### **YAML FRONTMATTER EXAMPLES**
+
+#### **Critical Safety Rules**
+```yaml
+---
+description: Critical Safety Rules - Essential safety protocols and security rules for AI development
+globs: ["**/*.py", "**/*.js", "**/*.ts", "**/*.java", "**/*.go", "**/*.rs"]
+alwaysApply: true
+priority: critical
+tags: ["safety", "security", "destructive-operations", "project-protection"]
+---
+```
+
+#### **Development Best Practices**
+```yaml
+---
+description: Development Best Practices - Universal development guidelines and tool usage best practices
+globs: ["**/*.py", "**/*.js", "**/*.ts", "**/*.java", "**/*.go", "**/*.rs"]
+alwaysApply: true
+priority: high
+tags: ["development", "tools", "code-quality", "file-management", "git", "architecture"]
+---
+```
+
+#### **Testing Guidelines**
+```yaml
+---
+description: Testing Guidelines - Comprehensive testing standards and best practices
+globs: ["tests/**/*.py", "tests/**/*.js", "**/*.test.js", "**/*.spec.js"]
+alwaysApply: true
+priority: high
+tags: ["testing", "quality", "validation", "test-architecture", "real-data"]
+---
+```
+
+## ❌ **COMMON MISTAKES TO AVOID**
+
+### **Missing YAML Frontmatter**
+```markdown
+# ❌ WRONG - No frontmatter
+# Content starts immediately
+# This will cause validation errors
+
+# Critical Safety Rules
+```
+
+### **Incomplete YAML Frontmatter**
+```yaml
+# ❌ WRONG - Missing required fields
+---
+description: "Some description"
+---
+```
+
+### **Incorrect YAML Syntax**
+```yaml
+# ❌ WRONG - Invalid YAML
+---
+description: "Description with unescaped quotes"
+globs: ["**/*.py", "**/*.js"]
+alwaysApply: true
+priority: critical
+tags: ["tag1", "tag2"]
+# Missing closing ---
+```
+
+### **Wrong Field Names**
+```yaml
+# ❌ WRONG - Using wrong field names
+---
+title: "Critical Safety Rules"  # Should be description
+category: "safety"             # Not a standard field
+version: "1.0"                 # Not a standard field
+globs: ["**/*.py"]
+---
+```
+
+## ✅ **CORRECT MDC FILE STRUCTURE**
+
+### **Complete Example**
+```yaml
+---
+description: "Critical Safety Rules - Essential safety protocols and security rules for AI development"
+globs: ["**/*.py", "**/*.js", "**/*.ts", "**/*.java", "**/*.go", "**/*.rs"]
+alwaysApply: true
+priority: critical
+tags: ["safety", "security", "destructive-operations", "project-protection"]
+---
+
+# Critical Safety Rules
+
+## 🚨 **CRITICAL: NEVER DESTROY WORK**
+
+### **MANDATORY SAFETY PROTOCOL**
+
+**BEFORE ANY DESTRUCTIVE OPERATION:**
+1. **PAUSE FOR 5 SECONDS** and think about what you're about to do
+2. **ASK YOURSELF**: "Will this destroy valuable work?"
+3. **IF YES**: Stop immediately and ask the user for explicit confirmation
+4. **NEVER** attempt destructive commands without explicit user approval
+5. **ALWAYS** verify you're on the correct branch before any git operations
+
+[Rest of content...]
+```
+
+## 🔧 **MDC FILE VALIDATION**
+
+### **Validation Checklist**
+Before creating or editing any MDC file, verify:
+- [ ] File starts with `---`
+- [ ] Contains all required fields: `description`, `globs`, `alwaysApply`, `priority`, `tags`
+- [ ] YAML syntax is valid (no syntax errors)
+- [ ] Ends with `---`
+- [ ] Content follows after the closing `---`
+- [ ] File extension is `.mdc`
+
+### **Validation Commands**
+```bash
+# Validate YAML syntax
+python -c "import yaml; yaml.safe_load(open('file.mdc').read().split('---')[1])"
+
+# Check for required fields
+grep -q "description:" file.mdc && echo "✅ description present" || echo "❌ description missing"
+grep -q "globs:" file.mdc && echo "✅ globs present" || echo "❌ globs missing"
+grep -q "alwaysApply:" file.mdc && echo "✅ alwaysApply present" || echo "❌ alwaysApply missing"
+grep -q "priority:" file.mdc && echo "✅ priority present" || echo "❌ priority missing"
+grep -q "tags:" file.mdc && echo "✅ tags present" || echo "❌ tags missing"
+```
+
+## 📋 **MDC FILE CREATION WORKFLOW**
+
+### **Step 1: Plan the File**
+1. **Determine purpose**: What is this rule file for?
+2. **Identify scope**: Which files should this apply to?
+3. **Set priority**: How important is this rule?
+4. **Choose tags**: What categories does this belong to?
+
+### **Step 2: Create YAML Frontmatter**
+```yaml
+---
+description: "Brief, clear description of the rule file's purpose"
+globs: ["**/*.py", "**/*.js"]  # File patterns this applies to
+alwaysApply: true  # or false
+priority: critical  # critical, high, medium, low
+tags: ["tag1", "tag2"]  # Relevant tags
+---
+```
+
+### **Step 3: Write Content**
+- Start with a clear title
+- Use markdown formatting
+- Include examples and counter-examples
+- Provide actionable guidance
+
+### **Step 4: Validate**
+- Check YAML syntax
+- Verify all required fields are present
+- Test with the MCP server validation
+
+## 🚨 **EMERGENCY FIXES**
+
+### **If YAML Frontmatter is Missing**
+```bash
+# Add frontmatter to existing file
+echo -e "---\ndescription: \"Description here\"\nglobs: [\"**/*.py\"]\nalwaysApply: true\npriority: high\ntags: [\"tag1\"]\n---\n\n$(cat file.mdc)" > file.mdc.new && mv file.mdc.new file.mdc
+```
+
+### **If YAML Syntax is Invalid**
+```bash
+# Validate and fix YAML
+python -c "import yaml; yaml.safe_load(open('file.mdc').read().split('---')[1])" 2>&1 | grep "line"
+```
+
+## 🎯 **BEST PRACTICES**
+
+### **File Naming**
+- Use descriptive names: `01-critical-safety.mdc`
+- Use numbered prefixes for priority: `01-`, `02-`, etc.
+- Use kebab-case for readability
+
+### **Content Organization**
+- Start with the most critical information
+- Use clear headings and subheadings
+- Include practical examples
+- Provide both correct and incorrect examples
+
+### **Maintenance**
+- Keep descriptions up-to-date
+- Review and update priorities as needed
+- Add new tags when appropriate
+- Remove obsolete content
+
+---
+
+**Remember**: The YAML frontmatter is REQUIRED for all MDC files. Without it, the MCP server cannot properly validate or apply the rules. **Always include complete, valid YAML frontmatter in every MDC file.**

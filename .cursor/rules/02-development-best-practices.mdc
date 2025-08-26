@@ -1,0 +1,590 @@
+---
+description: Development Best Practices - Universal development guidelines and tool usage best practices
+globs: ["**/*.py", "**/*.js", "**/*.ts", "**/*.java", "**/*.go", "**/*.rs"]
+alwaysApply: true
+priority: high
+tags: ["development", "tools", "code-quality", "file-management", "git", "architecture"]
+---
+
+# Development Best Practices
+
+## 🛠️ **USE EXISTING TOOLS - DON'T REINVENT THE WHEEL**
+
+### **CRITICAL RULE: LEVERAGE THE ECOSYSTEM**
+
+**BEFORE WRITING CODE OR GUESSING AT SOLUTIONS:**
+1. **ASK YOURSELF**: "Is there an existing tool for this?"
+2. **SEARCH FIRST**: Look for existing utilities, libraries, or commands
+3. **USE TOOLS**: Leverage the rich ecosystem of available tools
+4. **AVOID GUESSING**: Don't write bad code when tools exist
+5. **RESEARCH**: Understand the problem before attempting to solve it
+
+### **ESSENTIAL TOOLS TO USE**
+
+#### **Text Processing & Search**
+```bash
+# ✅ USE THESE TOOLS INSTEAD OF WRITING BAD CODE
+
+# Search for patterns in files
+grep -r "pattern" .                    # Search recursively
+grep -n "pattern" file.txt             # Show line numbers
+grep -i "pattern" file.txt             # Case insensitive
+grep -v "pattern" file.txt             # Exclude lines
+
+# Advanced text processing
+awk '{print $1}' file.txt              # Extract first column
+awk '/pattern/ {print $0}' file.txt    # Filter lines
+sed 's/old/new/g' file.txt             # Replace text
+sed -i 's/old/new/g' file.txt          # Replace in place
+
+# File inspection
+cat file.txt                           # View file contents
+head -n 10 file.txt                    # View first 10 lines
+tail -n 10 file.txt                    # View last 10 lines
+tail -f file.txt                       # Follow file changes
+less file.txt                          # Interactive file viewing
+```
+
+#### **Code Quality & Validation**
+```bash
+# ✅ USE THESE TOOLS INSTEAD OF GUESSING
+
+# Python code validation
+python -m py_compile file.py           # Check Python syntax
+python -m py_compile -q file.py        # Quiet mode
+python -c "import ast; ast.parse(open('file.py').read())"  # Parse AST
+
+# Python formatting and linting
+black file.py                          # Auto-format Python code
+black --check file.py                  # Check formatting without changing
+flake8 file.py                         # Lint Python code
+pylint file.py                         # Comprehensive Python linting
+mypy file.py                           # Type checking
+
+# JavaScript/TypeScript
+npx prettier --write file.js           # Format JavaScript/TypeScript
+npx eslint file.js                     # Lint JavaScript
+npx tsc --noEmit file.ts               # TypeScript type checking
+
+# JSON/YAML validation
+jq '.' file.json                       # Validate and format JSON
+jq -e '.' file.json                    # Exit with error if invalid
+yq eval file.yaml                      # Validate YAML
+python -c "import yaml; yaml.safe_load(open('file.yaml'))"  # Python YAML validation
+```
+
+#### **File System & Data Analysis**
+```bash
+# ✅ USE THESE TOOLS FOR FILE OPERATIONS
+
+# File system inspection
+ls -la                                 # List files with details
+find . -name "*.py"                    # Find Python files
+find . -type f -exec grep -l "pattern" {} \;  # Find files containing pattern
+du -sh directory/                      # Check directory size
+df -h                                  # Check disk space
+
+# Data analysis
+wc -l file.txt                         # Count lines
+wc -w file.txt                         # Count words
+sort file.txt                          # Sort lines
+uniq file.txt                          # Remove duplicates
+cut -d',' -f1,3 file.csv              # Extract specific columns
+```
+
+#### **Git & Version Control**
+```bash
+# ✅ USE THESE TOOLS FOR GIT OPERATIONS
+
+# Git inspection
+git log --oneline -10                  # Recent commits
+git diff HEAD~1                        # Changes in last commit
+git show HEAD                          # Show last commit details
+git status                             # Current status
+git branch -a                          # All branches
+
+# Git search
+git grep "pattern"                     # Search in tracked files
+git log -S "pattern"                   # Search commit history
+git blame file.txt                     # Who changed what and when
+```
+
+### **❌ COMMON MISTAKES TO AVOID**
+
+#### **Don't Write Bad Code When Tools Exist**
+```python
+# ❌ WRONG: Writing complex parsing code
+def parse_log_file(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    results = []
+    for line in lines:
+        if 'ERROR' in line:
+            parts = line.split()
+            # Complex parsing logic...
+    return results
+
+# ✅ CORRECT: Use existing tools
+import subprocess
+def parse_log_file(filename):
+    result = subprocess.run(['grep', 'ERROR', filename], 
+                          capture_output=True, text=True)
+    return result.stdout.splitlines()
+```
+
+#### **Don't Guess at Problems**
+```bash
+# ❌ WRONG: Random changes without understanding
+# "Let me try changing this and see if it works"
+
+# ✅ CORRECT: Use tools to understand the problem
+grep -r "error" .                      # Find error messages
+tail -f logfile.log                    # Monitor logs in real-time
+python -m py_compile file.py           # Check syntax errors
+git diff                               # See what changed
+```
+
+#### **Don't Ignore Available Tools**
+```bash
+# ❌ WRONG: Manual file operations
+# Manually editing files, copying/pasting, etc.
+
+# ✅ CORRECT: Use automation tools
+sed -i 's/old/new/g' file.txt          # Automated replacement
+awk '{print $1}' file.txt | sort | uniq # Extract, sort, deduplicate
+find . -name "*.py" -exec black {} \;   # Format all Python files
+```
+
+### **🎯 TOOL USAGE BEST PRACTICES**
+
+#### **Before Writing Code**
+1. **Search for existing solutions**: `grep`, `find`, `git grep`
+2. **Validate data formats**: `jq`, `yq`, `python -m py_compile`
+3. **Check code quality**: `black`, `flake8`, `pylint`
+4. **Understand the problem**: `cat`, `head`, `tail`, `less`
+
+#### **During Development**
+1. **Use linters**: `flake8`, `pylint`, `eslint`
+2. **Format code**: `black`, `prettier`
+3. **Validate syntax**: `python -m py_compile`, `tsc`
+4. **Monitor changes**: `tail -f`, `git diff`
+
+#### **For Debugging**
+1. **Search logs**: `grep`, `awk`, `sed`
+2. **Monitor files**: `tail -f`, `watch`
+3. **Analyze data**: `jq`, `awk`, `sort`, `uniq`
+4. **Check git history**: `git log`, `git blame`, `git show`
+
+### **📋 TOOL CHECKLIST**
+
+**Before writing any code, ask:**
+- [ ] Is there a command-line tool for this?
+- [ ] Is there a library or package for this?
+- [ ] Can I use `grep`, `awk`, `sed` instead?
+- [ ] Can I use `jq`, `yq` for data processing?
+- [ ] Can I use `black`, `flake8` for code quality?
+- [ ] Can I use `python -m py_compile` for validation?
+- [ ] Am I understanding the problem before solving it?
+
+**Remember**: The Unix philosophy is "do one thing and do it well." Use existing tools that are battle-tested and optimized rather than writing new, potentially buggy code.
+
+## 🏗️ **ARCHITECTURE PRINCIPLES**
+
+### **SEPARATION OF CONCERNS**
+- **Each module has a single responsibility** - no monolithic files
+- **Clear interfaces between components** - well-defined contracts
+- **Dependency injection** - avoid tight coupling
+- **No shared state between unrelated components** - prevent data leakage
+
+### **🔄 DRY PRINCIPLES - DON'T REPEAT YOURSELF**
+
+#### **CRITICAL RULE: ELIMINATE DUPLICATION**
+
+**ALWAYS APPLY DRY PRINCIPLES:**
+1. **IDENTIFY REPETITION** - Look for duplicated code, logic, or patterns
+2. **EXTRACT COMMON FUNCTIONALITY** - Create reusable functions, classes, or modules
+3. **USE ABSTRACTION** - Create interfaces and base classes for common patterns
+4. **CONFIGURATION OVER CODE** - Use configuration files instead of hardcoded values
+5. **TEMPLATE PATTERNS** - Use templates for repetitive structures
+
+#### **Code Duplication Examples**
+```python
+# ❌ WRONG: Repeated code patterns
+def process_user_data(user_data):
+    if not user_data:
+        raise ValueError("User data cannot be empty")
+    if "id" not in user_data:
+        raise ValueError("User data must have id")
+    if "name" not in user_data:
+        raise ValueError("User data must have name")
+    # Process user data...
+    return processed_data
+
+def process_product_data(product_data):
+    if not product_data:
+        raise ValueError("Product data cannot be empty")
+    if "id" not in product_data:
+        raise ValueError("Product data must have id")
+    if "name" not in product_data:
+        raise ValueError("Product data must have name")
+    # Process product data...
+    return processed_data
+
+# ✅ CORRECT: DRY approach with common validation
+def validate_required_fields(data, required_fields, data_type):
+    """Validate that data contains all required fields."""
+    if not data:
+        raise ValueError(f"{data_type} data cannot be empty")
+    
+    for field in required_fields:
+        if field not in data:
+            raise ValueError(f"{data_type} data must have {field}")
+
+def process_user_data(user_data):
+    validate_required_fields(user_data, ["id", "name"], "User")
+    # Process user data...
+    return processed_data
+
+def process_product_data(product_data):
+    validate_required_fields(product_data, ["id", "name"], "Product")
+    # Process product data...
+    return processed_data
+```
+
+### **📁 PROACTIVE MODULARIZATION - BREAK APART LARGE FILES**
+
+#### **CRITICAL RULE: MODULARIZE EARLY AND OFTEN**
+
+**WHEN TO BREAK APART FILES:**
+1. **File exceeds 300-500 lines** - Consider splitting into modules
+2. **Multiple responsibilities** - Each file should have one clear purpose
+3. **Repeated patterns** - Extract common functionality into separate modules
+4. **Complex imports** - If imports become unwieldy, split the file
+5. **Testing becomes difficult** - Large files are harder to test effectively
+
+#### **File Size Guidelines**
+```python
+# ❌ WRONG: Monolithic file (1000+ lines)
+# app/main.py - Everything in one file
+class UserManager:
+    # 200 lines of user management code
+    
+class ProductManager:
+    # 300 lines of product management code
+    
+class OrderManager:
+    # 400 lines of order management code
+    
+class DatabaseManager:
+    # 100 lines of database code
+
+# ✅ CORRECT: Modular structure
+# app/models/user.py
+class UserManager:
+    # 200 lines of user management code
+
+# app/models/product.py  
+class ProductManager:
+    # 300 lines of product management code
+
+# app/models/order.py
+class OrderManager:
+    # 400 lines of order management code
+
+# app/database/connection.py
+class DatabaseManager:
+    # 100 lines of database code
+
+# app/main.py - Just imports and orchestration
+from app.models.user import UserManager
+from app.models.product import ProductManager
+from app.models.order import OrderManager
+from app.database.connection import DatabaseManager
+```
+
+#### **Logical Module Structure**
+```python
+# ✅ CORRECT: Logical directory structure
+app/
+├── __init__.py
+├── main.py                 # Application entry point
+├── config/
+│   ├── __init__.py
+│   ├── database.py         # Database configuration
+│   ├── redis.py           # Redis configuration
+│   └── settings.py        # General settings
+├── models/
+│   ├── __init__.py
+│   ├── user.py            # User-related models
+│   ├── product.py         # Product-related models
+│   └── order.py           # Order-related models
+├── services/
+│   ├── __init__.py
+│   ├── auth.py            # Authentication service
+│   ├── email.py           # Email service
+│   └── payment.py         # Payment service
+├── utils/
+│   ├── __init__.py
+│   ├── validation.py      # Validation utilities
+│   ├── formatting.py      # Formatting utilities
+│   └── helpers.py         # General helper functions
+└── tests/
+    ├── __init__.py
+    ├── test_models/
+    ├── test_services/
+    └── test_utils/
+```
+
+### **🎯 MODULARIZATION BEST PRACTICES**
+
+#### **When to Modularize**
+- **File exceeds 300-500 lines** - Split into logical modules
+- **Multiple classes in one file** - Consider separate files per class
+- **Mixed responsibilities** - Separate concerns into different modules
+- **Complex imports** - If imports become unwieldy, split the file
+- **Testing difficulties** - Large files are harder to test effectively
+- **Code reuse opportunities** - Extract common functionality
+
+#### **Module Design Principles**
+1. **Single Responsibility** - Each module has one clear purpose
+2. **High Cohesion** - Related functionality stays together
+3. **Low Coupling** - Modules depend on each other minimally
+4. **Clear Interfaces** - Well-defined public APIs
+5. **Consistent Naming** - Use consistent naming conventions
+
+#### **Import Organization**
+```python
+# ✅ CORRECT: Organized imports
+# Standard library imports
+import os
+import sys
+from typing import List, Dict, Optional
+
+# Third-party imports
+import requests
+import pandas as pd
+from flask import Flask, request
+
+# Local application imports
+from app.models.user import User
+from app.services.email import EmailService
+from app.utils.validation import validate_email
+
+# ❌ WRONG: Disorganized imports
+import pandas as pd
+from app.models.user import User
+import os
+from flask import Flask, request
+import requests
+from app.utils.validation import validate_email
+import sys
+from app.services.email import EmailService
+from typing import List, Dict, Optional
+```
+
+### **📋 MODULARIZATION CHECKLIST**
+
+**Before creating a new file, ask:**
+- [ ] Is this file getting too large (>300-500 lines)?
+- [ ] Does this file have multiple responsibilities?
+- [ ] Is there code that could be reused elsewhere?
+- [ ] Are the imports becoming unwieldy?
+- [ ] Is this file difficult to test?
+- [ ] Could this functionality be extracted into a separate module?
+- [ ] Does this follow the single responsibility principle?
+- [ ] Are the module interfaces clear and well-defined?
+
+**When refactoring, consider:**
+- [ ] What is the primary responsibility of this module?
+- [ ] What functionality could be extracted into utilities?
+- [ ] What configuration could be moved to config files?
+- [ ] What services could be extracted into separate classes?
+- [ ] How can I reduce coupling between modules?
+- [ ] How can I improve testability?
+
+**Remember**: It's easier to start with a modular structure than to refactor a monolithic codebase later. **Proactively break apart large files into logical, reusable modules.**
+
+## 📝 **CODE STYLE & STANDARDS**
+
+### **Naming Conventions**
+- **Use descriptive, meaningful names** - avoid abbreviations
+- **Follow language-specific conventions** - PEP 8 for Python, camelCase for JavaScript
+- **Be consistent across the codebase** - establish and follow patterns
+- **Use clear, self-documenting names** - code should read like documentation
+
+### **Documentation**
+- **Document all public APIs and interfaces** - use docstrings and comments
+- **Include inline comments for complex logic** - explain the "why", not the "what"
+- **Keep documentation up to date** - update when code changes
+- **Use clear, concise language** - avoid jargon and ambiguity
+
+### **Error Handling**
+- **Implement proper error handling** - catch and handle exceptions appropriately
+- **Use appropriate error types** - create custom exceptions when needed
+- **Provide meaningful error messages** - help users understand what went wrong
+- **Log errors appropriately** - include context for debugging
+
+### **Performance**
+- **Consider performance implications** - profile and optimize critical paths
+- **Optimize critical code paths** - focus on bottlenecks
+- **Monitor resource usage** - memory, CPU, network, disk I/O
+- **Use appropriate data structures** - choose the right tool for the job
+
+## 🔄 **SYSTEMATIC REPLACEMENT APPROACHES**
+
+### **CRITICAL: ALWAYS IDENTIFY ALL REFERENCES BEFORE REPLACING CORE SYSTEMS**
+
+When replacing or significantly refactoring core systems:
+
+#### **STEP 1: IDENTIFY ALL DEPENDENCIES**
+```bash
+# Search for imports
+grep -r "from \.\.system import" .
+grep -r "import system" .
+
+# Search for function calls
+grep -r "get_system" .
+grep -r "SystemClass" .
+
+# Search for class references
+grep -r "class.*System" .
+```
+
+#### **STEP 2: DOCUMENT EVERY REFERENCE**
+Create a checklist of all files that need updates:
+```markdown
+## System Replacement Checklist
+- [ ] app/main.py - Import and function calls
+- [ ] app/components/feature.py - Import and function calls
+- [ ] tests/test_feature.py - Import and function calls
+```
+
+#### **STEP 3: EXECUTE SYSTEMATICALLY**
+- **One file at a time** - don't update multiple files simultaneously
+- **Test after each file** - verify the file works before moving to next
+- **Commit frequently** - save progress regularly
+- **Rollback if needed** - be prepared to revert changes
+
+### **FORWARD-ONLY DEVELOPMENT PRINCIPLES**
+For major refactoring projects:
+
+#### **CORE PRINCIPLES**
+- **NEVER** migrate old code - replace it completely
+- **NEVER** add backward compatibility layers
+- **NEVER** preserve legacy functionality
+- **ALWAYS** build new, clean architecture
+- **ALWAYS** focus on what you are building towards
+- **ALWAYS** use systematic approaches for major changes
+
+#### **WHAT THIS MEANS IN PRACTICE**
+- **Replace entire modules** - don't patch them
+- **New file organization** - don't preserve old structure
+- **Clean imports** - no legacy dependencies
+- **Clean slate approach** for all data structures
+
+## 📁 **FILE MANAGEMENT**
+
+### **TEMPORARY FILE MANAGEMENT**
+- **All temporary files in designated temp directory** - never in project root
+- **Organized subdirectories** - use descriptive names
+- **Proper cleanup required** - always clean up temporary files
+- **Version control ignored** - temp directories should be in `.gitignore`
+
+### **ORGANIZED TEMP DIRECTORY STRUCTURE**
+```
+temp/
+├── test_files/           # Test-related temporary files
+├── cache_dumps/          # Cache export/import files
+├── api_responses/        # API response dumps for debugging
+├── logs/                 # Temporary log files
+├── config_backups/       # Configuration backup files
+└── migration_data/       # Data migration temporary files
+```
+
+### **TEMP FILE PATTERNS**
+```python
+# ✅ CORRECT: Proper temp file creation
+def create_temp_file():
+    temp_dir = "temp/test_files"
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    temp_file = os.path.join(temp_dir, f"data_{timestamp}.json")
+    with open(temp_file, "w") as f:
+        json.dump(data, f)
+    
+    return temp_file
+
+def cleanup_temp_file(temp_file):
+    if os.path.exists(temp_file):
+        os.remove(temp_file)
+        
+    temp_dir = os.path.dirname(temp_file)
+    if os.path.exists(temp_dir) and not os.listdir(temp_dir):
+        os.rmdir(temp_dir)
+
+# ❌ WRONG: Improper temp file creation
+temp_file = "data.json"  # Wrong location
+with open(temp_file, "w") as f:
+    json.dump(data, f)
+# No cleanup - file remains in project root
+```
+
+### **CLEANUP PATTERNS**
+```python
+# ✅ CORRECT: Automatic cleanup with context manager
+class TempFileManager:
+    def __init__(self, subdirectory):
+        self.temp_dir = f"temp/{subdirectory}"
+        self.created_files = []
+        os.makedirs(self.temp_dir, exist_ok=True)
+    
+    def create_file(self, filename, data):
+        filepath = os.path.join(self.temp_dir, filename)
+        with open(filepath, "w") as f:
+            json.dump(data, f)
+        self.created_files.append(filepath)
+        return filepath
+    
+    def cleanup(self):
+        for filepath in self.created_files:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        
+        if os.path.exists(self.temp_dir) and not os.listdir(self.temp_dir):
+            os.rmdir(self.temp_dir)
+
+# Usage with context manager
+def test_with_temp_files():
+    with TempFileManager("test_data") as temp_mgr:
+        file1 = temp_mgr.create_file("input.json", input_data)
+        file2 = temp_mgr.create_file("output.json", output_data)
+        
+        result = process_files(file1, file2)
+        assert result is not None
+    
+    # Automatic cleanup when context exits
+```
+
+## 🎯 **SUCCESS METRICS**
+
+### **QUALITY METRICS**
+- **Test coverage** - maintain 90%+ code coverage
+- **Performance** - maintain or improve response times
+- **Memory usage** - monitor and optimize memory consumption
+- **Error rates** - minimize production errors
+- **Documentation** - keep documentation up to date
+- **Security** - zero critical security vulnerabilities
+- **Code review** - 100% of changes reviewed
+
+### **DEVELOPMENT METRICS**
+- **Build success rate** - maintain 95%+ successful builds
+- **Test pass rate** - maintain 95%+ test pass rate
+- **Code review time** - minimize time to review and merge
+- **Bug discovery rate** - catch issues early in development
+- **Deployment success rate** - maintain 99%+ successful deployments
+- **Security scan results** - zero critical vulnerabilities
+- **Performance benchmarks** - maintain or improve performance
+
+---
+
+**Remember**: These practices are universal and apply to any software project. Adapt them to your specific technology stack and requirements, but never compromise on the core principles of safety, quality, security, and maintainability. **Most importantly, use the rich ecosystem of existing tools instead of writing bad code or guessing at problems.**

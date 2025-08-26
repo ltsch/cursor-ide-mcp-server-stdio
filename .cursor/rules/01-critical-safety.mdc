@@ -1,0 +1,228 @@
+---
+description: Critical Safety Rules - Essential safety protocols and security rules for AI development
+globs: ["**/*.py", "**/*.js", "**/*.ts", "**/*.java", "**/*.go", "**/*.rs"]
+alwaysApply: true
+priority: critical
+tags: ["safety", "security", "destructive-operations", "project-protection"]
+---
+
+# Critical Safety Rules
+
+## 🚨 **CRITICAL: NEVER DESTROY WORK**
+
+### **MANDATORY SAFETY PROTOCOL**
+
+**BEFORE ANY DESTRUCTIVE OPERATION:**
+1. **PAUSE FOR 5 SECONDS** and think about what you're about to do
+2. **ASK YOURSELF**: "Will this destroy valuable work?"
+3. **IF YES**: Stop immediately and ask the user for explicit confirmation
+4. **NEVER** attempt destructive commands without explicit user approval
+5. **ALWAYS** verify you're on the correct branch before any git operations
+
+### **DESTRUCTIVE COMMANDS REQUIRING EXPLICIT CONFIRMATION**
+```bash
+# Git Operations
+git checkout main                    # Branch switching that could overwrite work
+git reset --hard                     # Hard reset that destroys uncommitted changes
+git clean -fd                        # Force clean that removes untracked files
+git rebase --abort                   # Abort rebase that could lose work
+
+# File System Operations
+rm -rf .cursor/rules/                # Remove rule files
+rm -rf venv/                         # Remove virtual environment
+rm -rf node_modules/                 # Remove Node.js dependencies
+find . -name "*.py" -delete          # Mass file deletion
+
+# Database Operations
+DROP TABLE users;                    # Database table deletion
+TRUNCATE TABLE cache;                # Database data truncation
+```
+
+### **IMMEDIATE ACTIONS IF WORK IS ALMOST DESTROYED**
+1. **STOP** the command immediately (Ctrl+C)
+2. **APOLOGIZE** for the dangerous action
+3. **VERIFY** all work is still intact
+4. **DOCUMENT** the mistake to prevent recurrence
+5. **ASK** the user what they want to do next
+
+### **PROJECT CONTEXT: THIS IS A CRITICAL MCP SERVER PROJECT**
+- **Cursor IDE Integration** - This server manages critical rule files for AI assistance
+- **File watching and validation** - Complex file system operations that must be safe
+- **Cross-platform compatibility** - Must work reliably across different systems
+- **Real-time rule management** - Users depend on this for their development workflow
+
+## 🔒 **SECURITY RULES**
+
+### **Input Validation**
+```python
+# ✅ CORRECT: Validate all inputs
+def process_user_input(user_data: dict) -> dict:
+    if not isinstance(user_data, dict):
+        raise ValueError("User data must be a dictionary")
+    
+    required_fields = ["id", "name", "email"]
+    for field in required_fields:
+        if field not in user_data:
+            raise ValueError(f"Missing required field: {field}")
+    
+    return user_data
+
+# ❌ WRONG: No validation
+def process_user_input(user_data):
+    return user_data  # No validation
+```
+
+### **Authentication & Authorization**
+```python
+# ✅ CORRECT: Proper authentication checks
+def require_auth(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            raise HTTPException(status_code=401, detail="Authentication required")
+        return func(*args, **kwargs)
+    return wrapper
+```
+
+### **Data Protection**
+```python
+# ✅ CORRECT: Secure data handling
+import hashlib
+import secrets
+
+def hash_password(password: str) -> str:
+    """Hash password with salt using secure algorithm."""
+    salt = secrets.token_hex(16)
+    hash_obj = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+    return f"{salt}${hash_obj.hex()}"
+```
+
+### **File System Security**
+```python
+# ✅ CORRECT: Safe file operations
+import os
+from pathlib import Path
+
+def safe_file_operation(file_path: str, operation):
+    """Safely perform file operations with validation."""
+    # Validate path is within allowed directory
+    allowed_dir = Path("/home/user/projects")
+    file_path = Path(file_path).resolve()
+    
+    if not file_path.is_relative_to(allowed_dir):
+        raise ValueError("File path outside allowed directory")
+    
+    # Perform operation
+    return operation(file_path)
+
+# ❌ WRONG: Unsafe file operations
+def unsafe_file_operation(file_path: str):
+    # No path validation
+    with open(file_path, 'w') as f:
+        f.write(data)  # Could write anywhere
+```
+
+## 🛡️ **PROJECT PROTECTION**
+
+### **Virtual Environment Safety**
+```bash
+# ✅ CORRECT: Safe virtual environment management
+python -m venv venv                  # Create in project directory
+source venv/bin/activate             # Activate safely
+pip install -r requirements.txt      # Install dependencies
+
+# ❌ WRONG: Dangerous operations
+rm -rf venv/                         # Never delete without backup
+pip install --user package           # Avoid user installs in projects
+```
+
+### **Node.js Safety**
+```bash
+# ✅ CORRECT: Safe Node.js operations
+npm install                          # Install in project directory
+npm run test                         # Run tests safely
+npm run build                        # Build safely
+
+# ❌ WRONG: Dangerous operations
+rm -rf node_modules/                 # Never delete without backup
+npm install -g package               # Avoid global installs
+```
+
+### **Git Safety**
+```bash
+# ✅ CORRECT: Safe git operations
+git status                           # Check current state
+git diff                             # Review changes
+git add .                            # Stage changes safely
+git commit -m "message"              # Commit safely
+
+# ❌ WRONG: Dangerous operations
+git reset --hard HEAD~1              # Never without confirmation
+git clean -fd                        # Never without confirmation
+git checkout main                    # Never without confirmation
+```
+
+## 🚨 **EMERGENCY PROCEDURES**
+
+### **If You Accidentally Destroy Work**
+1. **STOP IMMEDIATELY** - Don't make it worse
+2. **Check git status** - `git status` to see what's lost
+3. **Check git reflog** - `git reflog` to find recent commits
+4. **Use git stash** - `git stash list` to find stashed changes
+5. **Check backups** - Look for auto-saves or backups
+6. **Ask for help** - Don't try to fix complex issues alone
+
+### **Recovery Commands**
+```bash
+# Recover from git reset --hard
+git reflog                           # Find the commit hash
+git reset --hard HEAD@{1}            # Reset to previous state
+
+# Recover stashed changes
+git stash list                       # List stashes
+git stash apply stash@{0}            # Apply specific stash
+
+# Recover from accidental deletion
+git checkout HEAD -- filename        # Restore specific file
+git checkout HEAD -- .               # Restore all files
+```
+
+## 📋 **SAFETY CHECKLIST**
+
+### **Before Any Operation**
+- [ ] Am I on the correct branch?
+- [ ] Have I committed my current work?
+- [ ] Do I understand what this command will do?
+- [ ] Is there a safer alternative?
+- [ ] Do I have a backup or rollback plan?
+
+### **Before Destructive Operations**
+- [ ] Have I paused for 5 seconds to think?
+- [ ] Have I asked the user for explicit confirmation?
+- [ ] Do I have a clear recovery plan?
+- [ ] Am I working on a copy or backup?
+- [ ] Have I documented what I'm about to do?
+
+### **After Operations**
+- [ ] Did the operation complete successfully?
+- [ ] Is all expected data still present?
+- [ ] Are there any error messages to investigate?
+- [ ] Do I need to clean up any temporary files?
+- [ ] Should I document what was done?
+
+## 🎯 **SUCCESS METRICS**
+
+### **Safety Metrics**
+- **Zero data loss incidents** - No accidental deletions
+- **100% user confirmation** - All destructive operations confirmed
+- **Complete recovery capability** - Always have rollback plans
+- **Proper documentation** - All operations documented
+
+### **Security Metrics**
+- **Zero security vulnerabilities** - No input validation bypasses
+- **100% authentication** - All sensitive operations authenticated
+- **Proper data protection** - All sensitive data properly handled
+- **Safe file operations** - No path traversal vulnerabilities
+
+---
+
+**Remember**: Safety is not optional. Every operation must be performed with the utmost care and consideration for preserving valuable work and maintaining system security.

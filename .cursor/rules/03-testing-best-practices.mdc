@@ -1,0 +1,596 @@
+---
+description: Testing Best Practices - Comprehensive testing guidelines and patterns for ensuring code quality
+globs: ["tests/**/*.py", "tests/**/*.js", "**/*.test.js", "**/*.spec.js"]
+alwaysApply: true
+priority: high
+tags: ["testing", "quality", "validation", "test-architecture", "real-data"]
+---
+
+# Testing Best Practices
+
+## 🧪 **MANDATORY TESTING STANDARDS**
+
+### **CRITICAL REQUIREMENTS**
+- **Every function must have unit tests** - no exceptions
+- **Integration tests for all major functionality** - test real interactions
+- **End-to-end tests for complete workflows** - test full user journeys
+- **Test isolation** - each test must be independent
+- **No hardcoded values** - use centralized test configuration
+
+### **TEST COVERAGE TARGETS**
+- **Unit Tests**: 90%+ code coverage
+- **Integration Tests**: All major component interactions
+- **End-to-End Tests**: Complete user workflows
+- **Error Scenarios**: All failure conditions tested
+
+## 🏗️ **TEST ARCHITECTURE PATTERNS**
+
+### **Centralized Test Configuration**
+```python
+# ✅ CORRECT: Use centralized test configuration
+from app.test_config import TestConfig
+
+test_config = TestConfig()
+test_data = test_config.get_test_data("feature")
+
+# ❌ WRONG: Hardcoded values
+test_data = {"id": "12345", "name": "test"}  # Hardcoded
+```
+
+### **Test Isolation Patterns**
+```python
+# ✅ CORRECT: Independent test with proper setup/teardown
+class TestFeature:
+    def setup_method(self):
+        self.feature = Feature(test_config)
+        self.test_data = self.create_test_data()
+    
+    def teardown_method(self):
+        self.cleanup_test_data()
+    
+    def test_feature_function(self):
+        result = self.feature.process(self.test_data)
+        assert result is not None
+
+# ❌ WRONG: Tests that depend on each other
+class TestFeature:
+    def test_create(self):
+        self.created_id = self.feature.create(test_data)  # Shared state
+    
+    def test_get(self):
+        result = self.feature.get(self.created_id)  # Depends on previous test
+```
+
+### **Service-Specific Testing**
+```python
+# ✅ CORRECT: Service-specific test patterns
+class TestUserService:
+    def test_user_specific_features(self):
+        # Test user-specific functionality
+        result = self.service.get_users()
+        assert len(result) > 0
+
+class TestPaymentService:
+    def test_payment_specific_features(self):
+        # Test payment-specific functionality
+        result = self.service.process_payment(test_data)
+        assert result.status == "success"
+
+# ❌ WRONG: Generic tests that don't test specific functionality
+def test_generic_function():
+    result = generic_function(data)
+    assert result is not None  # Too generic
+```
+
+### **Service Isolation Testing**
+```python
+# ✅ CORRECT: Service isolation testing
+class TestServiceIsolation:
+    def test_user_payment_isolation(self):
+        # Test that user and payment services don't share data
+        user_data = self.user_service.get_data()
+        payment_data = self.payment_service.get_data()
+        
+        # Verify no cross-contamination
+        assert user_data.get("payment_info") is None
+        assert payment_data.get("user_profile") is None
+```
+
+## 📋 **TEST ORGANIZATION**
+
+### **Logical Test Structure**
+```
+tests/
+├── __init__.py
+├── conftest.py              # Shared fixtures and configuration
+├── unit/
+│   ├── __init__.py
+│   ├── test_models/
+│   ├── test_services/
+│   └── test_utils/
+├── integration/
+│   ├── __init__.py
+│   ├── test_api/
+│   └── test_database/
+├── e2e/
+│   ├── __init__.py
+│   └── test_workflows/
+└── fixtures/
+    ├── __init__.py
+    ├── test_data.json
+    └── mock_responses.json
+```
+
+### **Test File Naming Conventions**
+```python
+# ✅ CORRECT: Clear, descriptive test names
+test_user_creation.py           # Unit tests for user creation
+test_user_service_integration.py # Integration tests for user service
+test_user_workflow_e2e.py       # End-to-end user workflow tests
+
+# ❌ WRONG: Unclear test names
+test_user.py                    # Too generic
+test_1.py                       # Meaningless name
+test_stuff.py                   # Unclear purpose
+```
+
+### **Test Function Naming**
+```python
+# ✅ CORRECT: Descriptive test function names
+def test_user_creation_with_valid_data():
+    """Test that users can be created with valid input data."""
+    pass
+
+def test_user_creation_fails_with_invalid_email():
+    """Test that user creation fails when email is invalid."""
+    pass
+
+def test_user_service_returns_empty_list_when_no_users():
+    """Test that user service returns empty list when no users exist."""
+    pass
+
+# ❌ WRONG: Unclear test function names
+def test_user():
+    pass
+
+def test_creation():
+    pass
+
+def test_it_works():
+    pass
+```
+
+## 📊 **TEST DATA MANAGEMENT**
+
+### **Realistic Test Data**
+```python
+# ✅ CORRECT: Use realistic test data
+def test_user_creation():
+    user_data = {
+        "id": "user_123",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "created_at": "2024-12-19T10:00:00Z"
+    }
+    result = create_user(user_data)
+    assert result.id == "user_123"
+
+# ❌ WRONG: Unrealistic test data
+def test_user_creation():
+    user_data = {
+        "id": "123",
+        "name": "test",
+        "email": "test@test.com"
+    }
+    result = create_user(user_data)
+    assert result is not None
+```
+
+### **Test Data Factories**
+```python
+# ✅ CORRECT: Use test data factories
+class UserFactory:
+    @staticmethod
+    def create_user(**overrides):
+        default_data = {
+            "id": f"user_{uuid.uuid4().hex[:8]}",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        default_data.update(overrides)
+        return default_data
+
+def test_user_creation():
+    user_data = UserFactory.create_user(name="Jane Smith")
+    result = create_user(user_data)
+    assert result.name == "Jane Smith"
+```
+
+### **Test Data Cleanup**
+```python
+# ✅ CORRECT: Proper test data cleanup
+class TestUserService:
+    def setup_method(self):
+        self.test_users = []
+    
+    def teardown_method(self):
+        # Clean up test data
+        for user in self.test_users:
+            self.service.delete_user(user.id)
+    
+    def test_create_user(self):
+        user_data = UserFactory.create_user()
+        result = self.service.create_user(user_data)
+        self.test_users.append(result)
+        assert result.id is not None
+
+# ❌ WRONG: No cleanup
+def test_create_user():
+    user_data = UserFactory.create_user()
+    result = service.create_user(user_data)
+    assert result.id is not None
+    # Test data remains in database
+```
+
+## 🔍 **ASSERTION PATTERNS**
+
+### **Use Assert Statements**
+```python
+# ✅ CORRECT: Use assert statements
+def test_feature():
+    result = process_data(test_data)
+    assert result.id is not None
+    assert result.status == "success"
+    assert isinstance(result.data, dict)
+
+# ❌ WRONG: Return boolean values
+def test_feature():
+    result = process_data(test_data)
+    return result.id is not None  # Wrong - should use assert
+```
+
+### **Specific Assertions**
+```python
+# ✅ CORRECT: Specific, meaningful assertions
+def test_user_creation():
+    user_data = UserFactory.create_user()
+    result = create_user(user_data)
+    
+    assert result.id is not None
+    assert result.name == user_data["name"]
+    assert result.email == user_data["email"]
+    assert result.created_at is not None
+    assert isinstance(result.created_at, datetime)
+
+# ❌ WRONG: Generic assertions
+def test_user_creation():
+    user_data = UserFactory.create_user()
+    result = create_user(user_data)
+    assert result is not None  # Too generic
+```
+
+### **Error Testing**
+```python
+# ✅ CORRECT: Test error conditions
+def test_invalid_input():
+    with pytest.raises(ValueError) as exc_info:
+        process_data(invalid_data)
+    
+    assert "Invalid input" in str(exc_info.value)
+
+def test_missing_required_field():
+    incomplete_data = {"name": "John"}
+    with pytest.raises(ValueError) as exc_info:
+        create_user(incomplete_data)
+    
+    assert "email is required" in str(exc_info.value)
+
+# ❌ WRONG: Only test happy path
+def test_feature():
+    result = process_data(valid_data)
+    assert result is not None  # Only tests success case
+```
+
+## 🚨 **ERROR TESTING**
+
+### **Test All Failure Scenarios**
+```python
+# ✅ CORRECT: Comprehensive error testing
+class TestUserService:
+    def test_create_user_with_invalid_email(self):
+        user_data = UserFactory.create_user(email="invalid-email")
+        with pytest.raises(ValueError) as exc_info:
+            self.service.create_user(user_data)
+        assert "Invalid email format" in str(exc_info.value)
+    
+    def test_create_user_with_duplicate_email(self):
+        # Create first user
+        user1 = self.service.create_user(UserFactory.create_user())
+        
+        # Try to create second user with same email
+        user2_data = UserFactory.create_user(email=user1.email)
+        with pytest.raises(DuplicateEmailError) as exc_info:
+            self.service.create_user(user2_data)
+        assert "Email already exists" in str(exc_info.value)
+    
+    def test_create_user_with_missing_required_fields(self):
+        incomplete_data = {"name": "John"}
+        with pytest.raises(ValueError) as exc_info:
+            self.service.create_user(incomplete_data)
+        assert "email is required" in str(exc_info.value)
+```
+
+### **Test Edge Cases**
+```python
+# ✅ CORRECT: Test edge cases
+def test_empty_string_handling():
+    result = process_data("")
+    assert result == ""
+
+def test_none_value_handling():
+    with pytest.raises(ValueError):
+        process_data(None)
+
+def test_very_large_input():
+    large_data = "x" * 1000000
+    result = process_data(large_data)
+    assert len(result) <= MAX_LENGTH
+
+def test_special_characters():
+    special_data = "test@#$%^&*()_+-=[]{}|;':\",./<>?"
+    result = process_data(special_data)
+    assert result is not None
+```
+
+## 🔄 **INTEGRATION TESTING**
+
+### **Real API Testing**
+```python
+# ✅ CORRECT: Test with real APIs when possible
+class TestAPIIntegration:
+    def test_real_api_call(self):
+        # Use real API with test credentials
+        response = requests.get(
+            "https://api.example.com/users",
+            headers={"Authorization": f"Bearer {TEST_API_KEY}"}
+        )
+        assert response.status_code == 200
+        assert "users" in response.json()
+
+# ❌ WRONG: Only use mocks
+def test_api_call():
+    with patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = {"users": []}
+        mock_get.return_value.status_code = 200
+        # This doesn't test real API behavior
+```
+
+### **Database Integration Testing**
+```python
+# ✅ CORRECT: Test with real database
+class TestDatabaseIntegration:
+    def setup_method(self):
+        self.db = TestDatabase()
+        self.db.create_tables()
+    
+    def teardown_method(self):
+        self.db.drop_tables()
+    
+    def test_user_persistence(self):
+        user_data = UserFactory.create_user()
+        user = self.service.create_user(user_data)
+        
+        # Verify data is actually persisted
+        retrieved_user = self.service.get_user(user.id)
+        assert retrieved_user.id == user.id
+        assert retrieved_user.name == user.name
+```
+
+## 📈 **PERFORMANCE TESTING**
+
+### **Response Time Testing**
+```python
+# ✅ CORRECT: Test performance requirements
+def test_api_response_time():
+    start_time = time.time()
+    response = requests.get("https://api.example.com/users")
+    end_time = time.time()
+    
+    response_time = end_time - start_time
+    assert response_time < 1.0  # Must respond within 1 second
+    assert response.status_code == 200
+
+def test_database_query_performance():
+    start_time = time.time()
+    users = user_service.get_all_users()
+    end_time = time.time()
+    
+    query_time = end_time - start_time
+    assert query_time < 0.1  # Must complete within 100ms
+    assert len(users) >= 0
+```
+
+### **Memory Usage Testing**
+```python
+# ✅ CORRECT: Test memory usage
+def test_memory_efficiency():
+    import psutil
+    import os
+    
+    process = psutil.Process(os.getpid())
+    initial_memory = process.memory_info().rss
+    
+    # Perform operation
+    large_dataset = [{"id": i, "data": "x" * 1000} for i in range(10000)]
+    result = process_large_dataset(large_dataset)
+    
+    final_memory = process.memory_info().rss
+    memory_increase = final_memory - initial_memory
+    
+    # Memory increase should be reasonable
+    assert memory_increase < 50 * 1024 * 1024  # Less than 50MB increase
+```
+
+## 🔧 **TEST TOOLS & FRAMEWORKS**
+
+### **Python Testing Stack**
+```python
+# ✅ CORRECT: Use appropriate testing tools
+import pytest
+import unittest.mock
+from unittest.mock import patch, MagicMock
+
+# Test configuration
+pytest.ini:
+[tool:pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts = -v --tb=short --strict-markers
+markers =
+    unit: Unit tests
+    integration: Integration tests
+    e2e: End-to-end tests
+    slow: Slow running tests
+```
+
+### **JavaScript Testing Stack**
+```javascript
+// ✅ CORRECT: Use appropriate testing tools
+import { describe, it, expect, beforeEach, afterEach } from 'jest';
+import { render, screen } from '@testing-library/react';
+
+// Test configuration
+// jest.config.js
+module.exports = {
+  testEnvironment: 'node',
+  testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
+  collectCoverageFrom: [
+    'src/**/*.js',
+    '!src/**/*.test.js',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+};
+```
+
+## 📊 **TEST METRICS & REPORTING**
+
+### **Coverage Reporting**
+```python
+# ✅ CORRECT: Generate coverage reports
+# pytest.ini
+[tool:pytest]
+addopts = --cov=app --cov-report=html --cov-report=term-missing
+
+# Run tests with coverage
+pytest --cov=app --cov-report=html
+```
+
+### **Test Performance Metrics**
+```python
+# ✅ CORRECT: Monitor test performance
+# pytest.ini
+[tool:pytest]
+addopts = --durations=10 --durations-min=1.0
+
+# This will show the 10 slowest tests taking more than 1 second
+```
+
+## 🎯 **CONTINUOUS INTEGRATION**
+
+### **CI/CD Pipeline Integration**
+```yaml
+# ✅ CORRECT: Integrate tests into CI/CD
+# .github/workflows/test.yml
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      - name: Run tests
+        run: |
+          pytest --cov=app --cov-report=xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+```
+
+### **Pre-commit Hooks**
+```yaml
+# ✅ CORRECT: Run tests before commits
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: coverage
+        name: coverage
+        entry: coverage run -m pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+```
+
+## 📋 **TESTING CHECKLIST**
+
+### **Before Writing Tests**
+- [ ] Do I understand what the code is supposed to do?
+- [ ] What are the expected inputs and outputs?
+- [ ] What are the edge cases and error conditions?
+- [ ] What is the performance requirement?
+- [ ] Do I have realistic test data?
+
+### **While Writing Tests**
+- [ ] Are my test names descriptive and clear?
+- [ ] Are my tests independent of each other?
+- [ ] Am I testing both success and failure scenarios?
+- [ ] Am I using realistic test data?
+- [ ] Am I cleaning up test data properly?
+
+### **After Writing Tests**
+- [ ] Do all tests pass?
+- [ ] Is the test coverage adequate?
+- [ ] Are the tests maintainable?
+- [ ] Do the tests run in reasonable time?
+- [ ] Are the tests documented?
+
+## 🎯 **SUCCESS METRICS**
+
+### **Quality Metrics**
+- **Test Coverage**: 90%+ code coverage
+- **Test Pass Rate**: 95%+ test pass rate
+- **Test Performance**: Tests complete within reasonable time
+- **Test Maintainability**: Tests are easy to understand and modify
+
+### **Process Metrics**
+- **Test Execution Time**: Monitor and optimize test performance
+- **Test Reliability**: Tests should be deterministic and reliable
+- **Test Documentation**: All tests should be well-documented
+- **Test Automation**: All tests should run automatically in CI/CD
+
+---
+
+**Remember**: Testing is not optional. Every piece of code should be thoroughly tested to ensure it works correctly, handles errors gracefully, and performs as expected. **Good tests are the foundation of reliable, maintainable software.**
