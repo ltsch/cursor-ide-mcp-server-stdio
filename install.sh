@@ -37,24 +37,7 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Function to check Python version
-check_python_version() {
-    if command_exists python3; then
-        python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-        required_version="3.11"
-        
-        if python3 -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)"; then
-            print_success "Python $python_version found (>= $required_version required)"
-            return 0
-        else
-            print_error "Python $python_version found, but $required_version+ is required"
-            return 1
-        fi
-    else
-        print_error "Python 3 not found"
-        return 1
-    fi
-}
+
 
 # Function to install Node.js in user space
 install_nodejs_user() {
@@ -108,33 +91,7 @@ install_nodejs_user() {
     print_status "Please restart your terminal or run: source ~/.bashrc"
 }
 
-# Function to setup Python virtual environment
-setup_python_venv() {
-    print_status "Setting up Python virtual environment..."
-    
-    # Remove existing venv if it exists
-    if [ -d "venv" ]; then
-        print_status "Removing existing virtual environment..."
-        rm -rf venv
-    fi
-    
-    # Create new virtual environment
-    print_status "Creating Python virtual environment..."
-    python3 -m venv venv
-    
-    # Upgrade pip
-    print_status "Upgrading pip..."
-    venv/bin/python -m pip install --upgrade pip
-    
-    # Install Python dependencies
-    if [ -f "requirements.txt" ]; then
-        print_status "Installing Python dependencies..."
-        venv/bin/python -m pip install -r requirements.txt
-        print_success "Python dependencies installed"
-    else
-        print_warning "requirements.txt not found, skipping Python dependencies"
-    fi
-}
+
 
 # Function to install Node.js dependencies
 install_node_dependencies() {
@@ -154,22 +111,6 @@ install_node_dependencies() {
 # Function to verify installation
 verify_installation() {
     print_status "Verifying installation..."
-    
-    # Check Python virtual environment
-    if [ -d "venv" ]; then
-        print_success "Python virtual environment created"
-        
-        # Test MCP import
-        if venv/bin/python -c "import mcp; print('MCP library imported successfully')" 2>/dev/null; then
-            print_success "MCP library working correctly"
-        else
-            print_error "MCP library not working correctly"
-            return 1
-        fi
-    else
-        print_error "Python virtual environment not found"
-        return 1
-    fi
     
     # Check Node.js
     if command_exists node; then
@@ -197,6 +138,14 @@ verify_installation() {
         return 1
     fi
     
+    # Check MCP SDK
+    if node -e "import('@modelcontextprotocol/sdk/server/mcp.js')" >/dev/null 2>&1; then
+        print_success "MCP SDK working correctly"
+    else
+        print_error "MCP SDK not working correctly"
+        return 1
+    fi
+    
     print_success "Installation verification completed successfully"
 }
 
@@ -211,14 +160,7 @@ create_activation_script() {
 echo "🚀 Activating Enhanced MCP Server Environment"
 echo "============================================="
 
-# Activate Python virtual environment
-if [ -d "venv" ]; then
-    source venv/bin/activate
-    echo "✅ Python virtual environment activated"
-else
-    echo "❌ Python virtual environment not found"
-    exit 1
-fi
+
 
 # Add user bin to PATH if needed
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -230,8 +172,7 @@ echo "✅ Environment activated successfully"
 echo ""
 echo "Available commands:"
 echo "  node cursor_mcp_server.js  - Start the MCP server"
-echo "  node test_mcp_reload.js    - Test file watching"
-echo "  python -c 'import mcp'     - Test MCP library"
+echo "  npm run inspector          - Test with MCP Inspector"
 echo ""
 EOF
 
@@ -239,19 +180,63 @@ EOF
     print_success "Activation script created: ./activate_env.sh"
 }
 
+# Function to create MCP configuration
+create_mcp_config() {
+    print_status "Creating MCP configuration..."
+    
+    # Create .cursor directory if it doesn't exist
+    if [ ! -d ".cursor" ]; then
+        mkdir -p .cursor
+    fi
+    
+    # Create mcp.json configuration file
+    cat > .cursor/mcp.json << 'EOF'
+{
+  "mcpServers": {
+    "cursor-mcp-server": {
+      "command": "node",
+      "args": ["cursor_mcp_server.js"],
+      "env": {
+        "NODE_PATH": "node_modules"
+      }
+    }
+  }
+}
+EOF
+    
+    print_success "MCP configuration created: .cursor/mcp.json"
+}
+
 # Function to display next steps
 show_next_steps() {
     echo ""
     echo "🎉 Installation completed successfully!"
-    echo "======================================"
-    echo ""
-    echo "Next steps:"
-    echo "1. Restart your terminal or run: source ~/.bashrc"
-    echo "2. Activate the environment: source ./activate_env.sh"
-    echo "3. Start the MCP server: node cursor_mcp_server.js"
-    echo "4. Configure Cursor IDE to use the MCP server"
-    echo ""
-    echo "For more information, see README.md"
+echo "======================================"
+echo ""
+echo "Next steps:"
+echo "1. Restart your terminal or run: source ~/.bashrc"
+echo "2. Restart Cursor IDE to load the MCP server"
+echo ""
+echo "✅ Enhanced MCP server environment is now ready!"
+echo ""
+echo "🚀 New Features Available:"
+echo "   🤖 AI-Powered Rule Generation & Analysis"
+echo "   📄 Enhanced Rule Management Tools"
+echo "   🔍 Project Validation & Health Checks"
+echo "   📋 Resource Templates for Project Info"
+echo "   👀 Advanced File Watching & Monitoring"
+echo ""
+echo "When you open any project in Cursor IDE:"
+echo "   🔄 The MCP server will automatically detect the project"
+echo "   📁 Create .cursor/rules directory (if needed)"
+echo "   📄 Copy rule files from this project to the new project"
+echo "   👀 Set up file watching for rule changes"
+echo "   ⚙️  Configure .cursor/mcp.json (if needed)"
+echo "   🤖 AI tools will be available for rule management"
+echo ""
+echo "No manual configuration needed - everything works automatically!"
+echo ""
+echo "For more information, see README.md"
     echo ""
 }
 
@@ -259,18 +244,8 @@ show_next_steps() {
 main() {
     echo ""
     
-    # Check Python version
-    print_status "Checking Python version..."
-    if ! check_python_version; then
-        print_error "Python 3.11+ is required. Please install it first."
-        exit 1
-    fi
-    
     # Install Node.js in user space
     install_nodejs_user
-    
-    # Setup Python virtual environment
-    setup_python_venv
     
     # Install Node.js dependencies
     install_node_dependencies
@@ -280,6 +255,9 @@ main() {
     
     # Create activation script
     create_activation_script
+    
+    # Create MCP configuration
+    create_mcp_config
     
     # Show next steps
     show_next_steps

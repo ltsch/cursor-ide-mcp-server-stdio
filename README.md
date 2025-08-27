@@ -4,7 +4,7 @@ A specialized MCP (Model Context Protocol) server designed specifically for **Cu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18.20.8+-green.svg)](https://nodejs.org/)
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Cursor IDE](https://img.shields.io/badge/Cursor%20IDE-Specific-orange.svg)](https://cursor.sh/)
 [![Local Only](https://img.shields.io/badge/Local%20Only-Secure-brightgreen.svg)](https://modelcontextprotocol.io/)
 
@@ -85,34 +85,165 @@ If you prefer to install manually:
 # Install Node.js dependencies
 npm install
 
-# Create and activate Python virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install Python dependencies
-pip install -r requirements.txt
+# Install Node.js dependencies
+npm install
 
 # Start the server in your project directory
 node cursor_mcp_server.js
 ```
 
 ### Prerequisites
-- Python 3.11+ installed
+- Node.js 18+ installed
 - Cursor IDE configured for MCP
 
 The installation script will:
 - ✅ Install Node.js in user space (if not already installed)
-- ✅ Create Python virtual environment
-- ✅ Install all Python dependencies
+
+## 🚀 **Quick Setup for Any Project**
+
+### **Easy Configuration Generator**
+
+The easiest way to set up the MCP server in any project:
+
+```bash
+# Navigate to your project
+cd ~/your-project
+
+# Generate MCP configuration (one command!)
+node ~/cursor-ide-mcp-server-stdio/generate-config.js
+```
+
+**⚠️  IMPORTANT: Update the paths in the generated configuration to match your environment!**
+
+The generator will show you the exact paths to use, but you need to update them to point to where you actually cloned the repository.
+
+This will:
+- ✅ Show you the MCP server configuration to add
+- ✅ Use absolute paths to the MCP server
+- ✅ Set up proper Node.js environment
+- ✅ Verify all dependencies are available
+- ⚠️  **Require you to update paths for your environment**
+
+### **What the Generator Does**
+
+1. **Detects your project location** - Automatically finds where you are
+2. **Finds the MCP server** - Locates the cursor-ide-mcp-server-stdio installation
+3. **Generates correct paths** - Creates absolute paths for reliability
+4. **Creates `.cursor/mcp.json`** - Sets up the MCP configuration
+5. **Verifies setup** - Checks that all files and dependencies exist
+
+### **Example Output**
+
+```bash
+🚀 Cursor IDE MCP Server Configuration Generator
+================================================
+
+📍 You are in a different project directory
+📁 Current directory: /home/user/my-project
+📁 MCP Server location: /home/user/cursor-ide-mcp-server-stdio
+
+🔧 MCP Server Configuration:
+============================
+
+📋 Add this to your Cursor IDE MCP configuration:
+
+1. Open Cursor IDE Settings
+2. Go to "MCP & Integrations"
+3. Add a new MCP server with these settings:
+
+**Server Name:** cursor-mcp-server
+**Command:** node
+**Arguments:** /home/user/cursor-ide-mcp-server-stdio/cursor_mcp_server.js
+**Environment Variables:**
+   NODE_PATH = /home/user/cursor-ide-mcp-server-stdio/node_modules
+
+⚠️  IMPORTANT: Update the paths above to match your environment!
+   Current paths are based on: /home/user/cursor-ide-mcp-server-stdio
+   Make sure these paths point to where you cloned the repository
+
+📄 Or add this to your .cursor/mcp.json file:
+{
+  "mcpServers": {
+    "cursor-mcp-server": {
+      "command": "node",
+      "args": ["/home/user/cursor-ide-mcp-server-stdio/cursor_mcp_server.js"],
+      "env": {
+        "NODE_PATH": "/home/user/cursor-ide-mcp-server-stdio/node_modules"
+      }
+    }
+  }
+}
+
+⚠️  IMPORTANT: Update the paths in the JSON above to match your environment!
+   Current paths are based on: /home/user/cursor-ide-mcp-server-stdio
+   Make sure these paths point to where you cloned the repository
+
+💡 Next steps:
+   1. Add the MCP server configuration to Cursor IDE
+   2. Restart Cursor IDE to load the MCP server
+   3. Check MCP & Integrations settings to verify connection
+   4. The server will automatically set up rule files
+
+### **Path Customization**
+
+**The generated configuration uses absolute paths based on where the generator is run from. You MUST update these paths to match your environment:**
+
+#### **Example Path Updates:**
+
+**If you cloned to a different location:**
+```bash
+# Instead of: /home/user/cursor-ide-mcp-server-stdio/cursor_mcp_server.js
+# Use: /opt/my-mcp-server/cursor_mcp_server.js
+```
+
+**If you're on Windows:**
+```bash
+# Instead of: /home/user/cursor-ide-mcp-server-stdio/cursor_mcp_server.js
+# Use: C:\Users\YourName\cursor-ide-mcp-server-stdio\cursor_mcp_server.js
+```
+
+**If you're on macOS:**
+```bash
+# Instead of: /home/user/cursor-ide-mcp-server-stdio/cursor_mcp_server.js
+# Use: /Users/YourName/cursor-ide-mcp-server-stdio/cursor_mcp_server.js
+```
+
+#### **How to Find Your Path:**
+```bash
+# Navigate to where you cloned the repository
+cd ~/your-clone-location
+
+# Get the absolute path
+pwd
+# Output: /home/yourname/your-clone-location
+
+# The full path to the MCP server will be:
+# /home/yourname/your-clone-location/cursor_mcp_server.js
+```
 - ✅ Install all Node.js dependencies
 - ✅ Verify the installation
 - ✅ Create an activation script
 
 ### Configure Cursor IDE
-In Cursor IDE, go to Settings → MCP and add:
-- **Name**: Cursor Rules Server
-- **Command**: `node`
-- **Args**: `["/path/to/cursor-mcp-server/cursor_mcp_server.js"]`
+The installation script automatically creates the MCP configuration file `.cursor/mcp.json` in the project directory. Cursor IDE will automatically detect this configuration.
+
+**Manual Configuration** (if needed):
+1. Create `.cursor/mcp.json` in your project root:
+```json
+{
+  "mcpServers": {
+    "cursor-mcp-server": {
+      "command": "node",
+      "args": ["cursor_mcp_server.js"],
+      "env": {
+        "NODE_PATH": "node_modules"
+      }
+    }
+  }
+}
+```
+
+2. Restart Cursor IDE to load the MCP server
 
 > **Important**: The server communicates with Cursor IDE via stdio only. No network configuration is required or possible.
 
@@ -260,11 +391,10 @@ inotifywait -m -r .cursor/rules/
 #### Check Dependencies
 ```bash
 # Verify Node.js dependencies are installed
-npm list @modelcontextprotocol/server-filesystem
+npm list @modelcontextprotocol/sdk
 
-# Verify Python dependencies are installed
-source venv/bin/activate
-pip list | grep mcp
+# Verify MCP SDK is working
+node -e "import('@modelcontextprotocol/sdk')"
 ```
 
 #### Reinstall Dependencies
@@ -358,10 +488,10 @@ cursor-mcp-server/
 ├── cursor_mcp_server.js      # Enhanced Node.js server
 ├── package.json             # Node.js dependencies
 ├── package-lock.json        # Node.js lock file
-├── requirements.txt         # Python dependencies
+
 ├── .gitignore              # Git ignore rules
 ├── README.md              # This file
-├── venv/                   # Python virtual environment (not in git)
+
 ├── node_modules/           # Node.js dependencies (not in git)
 └── .cursor/
     └── rules/             # Rule files (in git)
@@ -389,15 +519,19 @@ cursor-mcp-server/
 
 ### Dependencies
 - **Node.js** - Runtime environment for the MCP server
-- **@modelcontextprotocol/server-filesystem** - MCP filesystem server
-- **Python 3.11+** - For additional MCP tools and utilities
-- **mcp>=1.13.1** - Python MCP library (installed in venv)
+- **@modelcontextprotocol/sdk** - Official MCP SDK for Node.js
+- **zod** - Schema validation for MCP tools
 
 ### Cursor IDE Specific Features
 - **`.cursor/rules` directory structure** - Optimized for Cursor IDE
 - **MCP protocol compliance** - Designed for Cursor IDE's MCP implementation
 - **File watching integration** - Works seamlessly with Cursor IDE's file monitoring
 - **Rule validation** - Ensures compatibility with Cursor IDE's rule system
+- **AI-Powered Rule Generation** - Generate new rules using LLM integration
+- **Rule Analysis & Suggestions** - AI-powered analysis of existing rules
+- **Text Summarization** - Summarize any text using the connected AI model
+- **Project Validation** - Comprehensive project health checks
+- **Resource Templates** - Structured project and configuration information
 
 ### Security Features
 - **No network connectivity** - Operates entirely locally

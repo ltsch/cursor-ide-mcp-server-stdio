@@ -301,6 +301,8 @@ config.local.json
 !.cursor/rules/05-mdc-file-management.mdc
 !.cursor/rules/README.md
 
+
+
 # Keep the rules directory structure but ignore generated content
 .cursor/rules/temp/
 .cursor/rules/test-*
